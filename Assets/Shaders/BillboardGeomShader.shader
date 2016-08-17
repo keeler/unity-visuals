@@ -14,7 +14,6 @@
 		Blend SrcAlpha OneMinusSrcAlpha
 
 		Cull off
-		ZWrite off
 
 		Pass {
 			CGPROGRAM
@@ -137,8 +136,12 @@
 				}
 				else if (i.shape == 2) {
 					col = tex2D(_CrossTexture, i.uv) * i.color;
-				}				
-			
+				}
+
+				if (col.a < 0.01) {
+					discard;
+				}
+				
 				return col;
 			}
 
