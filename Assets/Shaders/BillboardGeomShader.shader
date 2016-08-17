@@ -38,7 +38,7 @@
 			struct PointData {
 				float3 pos;
 				float4 color;
-				float shape;
+				int shape;
 			};
 
 			//The buffer containing the points we want to draw.
@@ -46,9 +46,9 @@
 
 			struct VertexData {
 				float4 pos : SV_POSITION;
-				float4 color: COLOR;
+				float4 color: COLOR0;
 				float2 uv : TEXCOORD0;
-				float2 shape : TEXCOORD1;
+				int shape : NORMAL0;
 			};
 
 			VertexData vert(uint id : SV_VertexID) {
@@ -56,7 +56,7 @@
 				UNITY_INITIALIZE_OUTPUT(VertexData, v);
 				v.pos = float4(geomCenters[id].pos + _worldPos, 1.0f);
 				v.color = geomCenters[id].color;
-				v.shape = float2(geomCenters[id].shape, 1);
+				v.shape = geomCenters[id].shape;
 				return v;
 			}
 
@@ -104,33 +104,41 @@
 
 				pIn.pos = mul(UNITY_MATRIX_VP, v[0]);
 				pIn.uv = float2(0.0f, 0.0f);
+				pIn.color = p[0].color;
+				pIn.shape = p[0].shape;
 				triStream.Append(pIn);
 
 				pIn.pos = mul(UNITY_MATRIX_VP, v[1]);
 				pIn.uv = float2(0.0f, 1.0f);
+				pIn.color = p[0].color;
+				pIn.shape = p[0].shape;
 				triStream.Append(pIn);
 
 				pIn.pos = mul(UNITY_MATRIX_VP, v[2]);
 				pIn.uv = float2(1.0f, 0.0f);
+				pIn.color = p[0].color;
+				pIn.shape = p[0].shape;
 				triStream.Append(pIn);
 
 				pIn.pos = mul(UNITY_MATRIX_VP, v[3]);
 				pIn.uv = float2(1.0f, 1.0f);
+				pIn.color = p[0].color;
+				pIn.shape = p[0].shape;
 				triStream.Append(pIn);
 			}
 
 			float4 frag(VertexData i) : COLOR {
 				float4 col;
-				//if (i.shape == 0) {
-					col = tex2D(_CircleTexture, i.uv) * _Color;
-				//}
-				//else if (i.shape == 1) {
-				//	col = tex2D(_SquareTexture, i.uv) * _Color;
-				//}
-				//else if (i.shape == 2) {
-				//	col = tex2D(_CrossTexture, i.uv) * _Color;
-				//}
-
+				if (i.shape == 0) {
+					col = tex2D(_CircleTexture, i.uv) * i.color;
+				}
+				else if (i.shape == 1) {
+					col = tex2D(_SquareTexture, i.uv) * i.color;
+				}
+				else if (i.shape == 2) {
+					col = tex2D(_CrossTexture, i.uv) * i.color;
+				}				
+			
 				return col;
 			}
 

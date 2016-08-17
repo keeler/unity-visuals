@@ -23,7 +23,7 @@ public class BillboardParticles : MonoBehaviour
     {
         public Vector3 pos;
         public Color color;
-        public float shape;
+        public int shape;
     };
 
     // Use this for initialization
@@ -34,6 +34,7 @@ public class BillboardParticles : MonoBehaviour
         // Data sampled from https://syntagmatic.github.io/parallel-coordinates/examples/data/cars.csv
         var cars = new float[,]
         {
+            // year, weight (lbs), power (hp), economy (mpg), num cylinders
             {73f, 3821f, 175f, 13f, 8f},
             {70f, 3850f, 190f, 15f, 8f},
             {72f, 3672f, 150f, 17f, 8f},
@@ -474,15 +475,29 @@ public class BillboardParticles : MonoBehaviour
             var x = (cars[i, 0] - xMin) / (xMax - xMin);
             var y = (cars[i, 1] - yMin) / (yMax - yMin);
             var z = (cars[i, 2] - zMin) / (zMax - zMin);
+            var h = (cars[i, 3] - colorMin) / (1.1f * (colorMax - colorMin)); // HSV wraps around from red to red, so make it so range isn't fully [0, 1]
+            int shape = -1;
+            if (cars[i, 4] == 4)
+            {
+                shape = 0;
+            }
+            if (cars[i, 4] == 6)
+            {
+                shape = 1;
+            }
+            if (cars[i, 4] == 8)
+            {
+                shape = 2;
+            }
             points[i] = new PointData()
             {
                 pos = new Vector3(x, y, z),
-                color = Color.white,
-                shape = 0f
+                color = Color.HSVToRGB(h, 1.0f, 1.0f),//new Color(r, 0.0f, 0.0f, 1.0f),
+                shape = shape
             };
         }
         
-        outputBuffer = new ComputeBuffer(points.Length, 32);
+        outputBuffer = new ComputeBuffer(points.Length, (sizeof(float) * 3) + (sizeof(float) * 4) + sizeof(int));
         outputBuffer.SetData(points);
     }
 
